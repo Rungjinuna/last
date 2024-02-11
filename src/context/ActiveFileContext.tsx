@@ -1,8 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from "react"
+import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from "react"
 
 interface ActiveFileContextType {
   activeFile: string
   setActiveFile: (fileContent: string) => void
+  addTab: (tab: string) => void
+  removeTab: (tab: string) => void
+  tabs: string[]
+  setTabs: Dispatch<SetStateAction<string[]>> // setTabs 함수의 타입 명시
 }
 
 const ActiveFileContext = createContext<ActiveFileContextType | undefined>(undefined)
@@ -21,6 +25,19 @@ interface ActiveFileProviderProps {
 
 export const ActiveFileProvider: React.FC<ActiveFileProviderProps> = ({ children }) => {
   const [activeFile, setActiveFile] = useState<string>("")
+  const [tabs, setTabs] = useState<string[]>([])
 
-  return <ActiveFileContext.Provider value={{ activeFile, setActiveFile }}>{children}</ActiveFileContext.Provider>
+  const addTab = (tab: string) => {
+    setTabs(prevTabs => [...prevTabs, tab])
+  }
+
+  const removeTab = (tab: string) => {
+    setTabs(prevTabs => prevTabs.filter(id => id !== tab))
+  }
+
+  return (
+    <ActiveFileContext.Provider value={{ activeFile, setActiveFile, addTab, removeTab, tabs, setTabs }}>
+      {children}
+    </ActiveFileContext.Provider>
+  )
 }
