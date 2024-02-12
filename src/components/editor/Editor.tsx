@@ -12,12 +12,12 @@ import { cppCompletions, javaCompletions, pythonCompletions } from "./autocomple
 import { useActiveFile } from "../../context/ActiveFileContext"
 
 const Editor: React.FC = () => {
-  const { activeFile } = useActiveFile()
+  const { activeFile, activeFileContent } = useActiveFile()
 
   return (
     <CodeMirror
       theme={material}
-      value={activeFile}
+      value={activeFileContent || activeFile}
       height="100%"
       basicSetup={{
         foldGutter: true,

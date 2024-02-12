@@ -13,20 +13,30 @@ const IDEPage = () => {
 
 const IDEContent = () => {
   const [isFileTreeVisible, setIsFileTreeVisible] = useState(true)
-  const { tabs, setTabs } = useActiveFile()
+  const { tabs, setTabs, activeFile, setActiveFile, activeFileContent, setActiveFileContent } = useActiveFile()
 
   const toggleFileTree = () => {
     setIsFileTreeVisible(!isFileTreeVisible)
   }
-
-  const addTab = (fileData: string) => {
-    setTabs(prevTabs => [...prevTabs, fileData])
+  // addTab 함수는 이제 파일의 'data'와 'content'를 받습니다.
+  const addTab = (fileData: string, fileContent: string) => {
+    const isTabOpen = tabs.some(tab => tab.data === fileData)
+    if (!isTabOpen) {
+      setTabs(prevTabs => [...prevTabs, { data: fileData, content: fileContent }])
+    }
+    setActiveFile(fileData) // 파일의 'data'를 활성 파일로 설정합니다.
+    setActiveFileContent(fileContent)
   }
 
-  const removeTab = (fileIndex: string) => {
-    setTabs(prevTabs => prevTabs.filter(id => id !== fileIndex))
+  const removeTab = (fileData: string) => {
+    setTabs(prevTabs => prevTabs.filter(tab => tab.data !== fileData))
+    if (activeFile === fileData) {
+      setActiveFile("")
+      setActiveFileContent("")
+    }
   }
 
+  const isTabActive = (fileData: string) => activeFile === fileData
   return (
     <div className="flex h-screen bg-gray-500">
       <div className={`transition-width duration-500 ${isFileTreeVisible ? "w-64" : "w-0"} overflow-auto`}>
@@ -42,18 +52,26 @@ const IDEContent = () => {
       </button>
 
       <div className="flex-1 overflow-y-auto pl-5 mt-5">
-        <div className="flex">
-          {tabs.map((fileData, index) => (
-            <div key={index} className="bg-gray-300 mr-2 p-2 rounded-lg ">
-              {fileData}
-              <button onClick={() => removeTab(fileData)} className="ml-1">
+        <div className="flex ml-1">
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              className={`mr-2 p-2 rounded-sm ${isTabActive(tab.data) ? "bg-blue-500 text-white" : "bg-gray-300"}`}
+              onClick={() => {
+                setActiveFile(tab.data)
+                console.log(tab.data)
+                setActiveFileContent(tab.content)
+              }}
+            >
+              {tab.data}
+              <button onClick={() => removeTab(tab.data)} className="ml-1">
                 x
               </button>
             </div>
           ))}
         </div>
 
-        <div className="mt-5">
+        <div className="flex-1">
           <Editor />
         </div>
       </div>

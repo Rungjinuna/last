@@ -71,8 +71,7 @@ class CustomDataProviderImplementation implements TreeDataProvider<any> {
 
 function FileTree() {
   const [initialData, setInitialData] = useState<any>({ root: { children: [], depth: 0 } })
-  const { setActiveFile } = useActiveFile()
-  const { addTab } = useActiveFile()
+  const { setActiveFile, setActiveFileContent, addTab } = useActiveFile()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,8 +144,9 @@ function FileTree() {
             const itemData = dataProvider.getTreeItem(itemId).then(item => {
               console.log("Item data:", item)
               if (!item.isFolder) {
-                setActiveFile(item.content) // 선택된 파일의 데이터 설정
-                addTab(item.data) // 탭 추가
+                setActiveFile(item.data) // 선택된 파일의 식별자를 활성 파일로 설정
+                setActiveFileContent(item.content) // 선택된 파일의 내용을 에디터에 설정
+                addTab({ data: item.data, content: item.content }) // 탭 추가
               }
             })
           })

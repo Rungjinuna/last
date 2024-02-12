@@ -1,12 +1,20 @@
 import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from "react"
 
+// Tab 타입을 정의합니다.
+interface Tab {
+  data: string
+  content: string
+}
+
 interface ActiveFileContextType {
   activeFile: string
-  setActiveFile: (fileContent: string) => void
-  addTab: (tab: string) => void
-  removeTab: (tab: string) => void
-  tabs: string[]
-  setTabs: Dispatch<SetStateAction<string[]>> // setTabs 함수의 타입 명시
+  setActiveFile: Dispatch<SetStateAction<string>>
+  addTab: (tab: Tab) => void
+  removeTab: (tabName: string) => void
+  tabs: Tab[]
+  setTabs: Dispatch<SetStateAction<Tab[]>>
+  activeFileContent: string
+  setActiveFileContent: Dispatch<SetStateAction<string>>
 }
 
 const ActiveFileContext = createContext<ActiveFileContextType | undefined>(undefined)
@@ -14,7 +22,7 @@ const ActiveFileContext = createContext<ActiveFileContextType | undefined>(undef
 export const useActiveFile = () => {
   const context = useContext(ActiveFileContext)
   if (!context) {
-    throw new Error("useActiveFile must be used within a ActiveFileProvider")
+    throw new Error("useActiveFile must be used within an ActiveFileProvider")
   }
   return context
 }
@@ -25,18 +33,35 @@ interface ActiveFileProviderProps {
 
 export const ActiveFileProvider: React.FC<ActiveFileProviderProps> = ({ children }) => {
   const [activeFile, setActiveFile] = useState<string>("")
-  const [tabs, setTabs] = useState<string[]>([])
+  const [tabs, setTabs] = useState<Tab[]>([])
+  const [activeFileContent, setActiveFileContent] = useState<string>("")
 
-  const addTab = (tab: string) => {
-    setTabs(prevTabs => [...prevTabs, tab])
+  const addTab = (newTab: Tab) => {
+    setTabs(prevTabs => [...prevTabs, newTab])
   }
 
-  const removeTab = (tab: string) => {
-    setTabs(prevTabs => prevTabs.filter(id => id !== tab))
+  const removeTab = (tabData: string) => {
+    setTabs(prevTabs => prevTabs.filter(tab => tab.data !== tabData))
+    // If the active file is being closed, clear the active content.
+    if (activeFile === tabData) {
+      setActiveFile("")
+      setActiveFileContent("")
+    }
   }
 
   return (
-    <ActiveFileContext.Provider value={{ activeFile, setActiveFile, addTab, removeTab, tabs, setTabs }}>
+    <ActiveFileContext.Provider
+      value={{
+        activeFile,
+        setActiveFile,
+        addTab,
+        removeTab,
+        tabs,
+        setTabs,
+        activeFileContent,
+        setActiveFileContent
+      }}
+    >
       {children}
     </ActiveFileContext.Provider>
   )
